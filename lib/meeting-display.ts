@@ -7,10 +7,11 @@ export const MEETING_TYPE_LABELS: Record<MeetingType, string> = {
   regular: 'Sacrament meeting',
   stake: 'Stake conference',
   general: 'General conference',
+  special: 'Special meeting',
 };
 
 export function isSacramentMeeting(meetingType: MeetingType): boolean {
-  return meetingType === 'testimony' || meetingType === 'regular';
+  return meetingType !== 'stake' && meetingType !== 'general';
 }
 
 export function formatHymn(hymn: Hymn): string {

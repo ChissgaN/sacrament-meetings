@@ -6,9 +6,14 @@ import type { SacramentMeeting } from '@/lib/types';
 interface MeetingCardProps {
   meeting: SacramentMeeting;
   isCurrent?: boolean;
+  isUpcoming?: boolean;
 }
 
-export default function MeetingCard({ meeting, isCurrent = false }: MeetingCardProps) {
+export default function MeetingCard({
+  meeting,
+  isCurrent = false,
+  isUpcoming = false,
+}: MeetingCardProps) {
   const speakerCount = meeting.speakers.filter(
     (item) => item.type === 'speaker',
   ).length;
@@ -24,8 +29,13 @@ export default function MeetingCard({ meeting, isCurrent = false }: MeetingCardP
             This Sunday
           </span>
         )}
+        {isUpcoming && (
+          <span className="rounded bg-surface px-2 py-1 text-muted ring-1 ring-border">
+            Upcoming
+          </span>
+        )}
       </div>
-      <h3 className="text-xl font-bold">
+      <h2 className="text-xl font-bold">
         {/* The ::after overlay makes the whole card clickable with a single tab stop. */}
         <Link
           href={`/meetings/${meeting.id}`}
@@ -33,7 +43,7 @@ export default function MeetingCard({ meeting, isCurrent = false }: MeetingCardP
         >
           {formatLongDate(meeting.date)}
         </Link>
-      </h3>
+      </h2>
       {isSacramentMeeting(meeting.meetingType) ? (
         <p className="text-muted">
           Conducting: {meeting.conducting}
