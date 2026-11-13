@@ -229,11 +229,7 @@ export async function getMeetingById(id: number): Promise<SacramentMeeting | und
   return meetings.find((meeting) => meeting.id === id);
 }
 
-/**
- * Returns the meeting on the given Sunday. If none has been entered yet, returns
- * the latest meeting before it so /meetings/current always has a destination.
- */
-export async function getMeetingForSunday(sunday: string): Promise<SacramentMeeting | undefined> {
-  const allMeetings = await getMeetings();
-  return allMeetings.find((meeting) => meeting.date <= sunday);
+/** Returns the meeting on exactly the given ISO date, if one has been entered. */
+export async function getMeetingByDate(date: string): Promise<SacramentMeeting | undefined> {
+  return meetings.find((meeting) => meeting.date === date);
 }
