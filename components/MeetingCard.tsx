@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import DeleteMeetingButton from '@/components/DeleteMeetingButton';
 import { formatLongDate } from '@/lib/dates';
 import { MEETING_TYPE_LABELS, isSacramentMeeting } from '@/lib/meeting-display';
 import type { SacramentMeeting } from '@/lib/types';
@@ -14,6 +15,7 @@ export default function MeetingCard({
   isCurrent = false,
   isUpcoming = false,
 }: MeetingCardProps) {
+  const dateLabel = formatLongDate(meeting.date);
   const speakerCount = meeting.speakers.filter(
     (item) => item.type === 'speaker',
   ).length;
@@ -41,7 +43,7 @@ export default function MeetingCard({
           href={`/meetings/${meeting.id}`}
           className="text-primary underline-offset-2 after:absolute after:inset-0 hover:underline"
         >
-          {formatLongDate(meeting.date)}
+          {dateLabel}
         </Link>
       </h2>
       {isSacramentMeeting(meeting.meetingType) ? (
@@ -55,6 +57,17 @@ export default function MeetingCard({
       ) : (
         <p className="text-muted">No sacrament meeting this week</p>
       )}
+      {/* z-10 lifts the actions above the card's full-size link overlay. */}
+      <div className="relative z-10 mt-auto flex flex-wrap items-center gap-2 pt-2 print:hidden">
+        <Link
+          href={`/meetings/${meeting.id}/edit`}
+          aria-label={`Edit meeting on ${dateLabel}`}
+          className="rounded-md border border-primary px-3 py-1 text-sm font-semibold text-primary transition-colors hover:bg-primary-soft"
+        >
+          Edit
+        </Link>
+        <DeleteMeetingButton id={meeting.id} dateLabel={dateLabel} />
+      </div>
     </article>
   );
 }

@@ -150,22 +150,63 @@ export async function getFilteredMeetings(query: string, page: number): Promise<
   return { meetings: rows.map(toMeeting), page: currentPage, totalPages, totalCount };
 }
 
-// Mutations are wired to the database in Week 04, when the forms are built.
 export type NewMeeting = Omit<SacramentMeeting, 'id'>;
 
+// JSONB columns receive JSON text and TEXT[] receives a JS array; both are sent
+// as query parameters through the tagged template.
 export async function addMeeting(meeting: NewMeeting): Promise<SacramentMeeting> {
-  throw new Error(`addMeeting (${meeting.date}) is not implemented until Week 04.`);
+  const sql = getSql();
+  const rows = (await sql`
+    INSERT INTO meetings (
+      date, meeting_type, presiding, conducting, announcements,
+      opening_hymn, opening_prayer, ward_business, stake_business,
+      sacrament_hymn, speakers, closing_hymn, closing_prayer
+    ) VALUES (
+      ${meeting.date}, ${meeting.meetingType}, ${meeting.presiding}, ${meeting.conducting},
+      ${meeting.announcements ?? []}::text[],
+      ${JSON.stringify(meeting.openingHymn)}::jsonb, ${meeting.openingPrayer},
+      ${JSON.stringify(meeting.wardBusiness)}::jsonb, ${meeting.stakeBusiness},
+      ${JSON.stringify(meeting.sacramentHymn)}::jsonb,
+      ${JSON.stringify(meeting.speakers)}::jsonb,
+      ${JSON.stringify(meeting.closingHymn)}::jsonb, ${meeting.closingPrayer}
+    )
+    RETURNING *, to_char(date, 'YYYY-MM-DD') AS iso_date`) as MeetingRow[];
+
+  return toMeeting(rows[0]);
 }
 
+/** Replaces every field of a meeting. Returns undefined if the id does not exist. */
 export async function updateMeeting(
   id: number,
-  changes: Partial<NewMeeting>,
+  meeting: NewMeeting,
 ): Promise<SacramentMeeting | undefined> {
-  throw new Error(
-    `updateMeeting (${id}: ${Object.keys(changes).join(', ')}) is not implemented until Week 04.`,
-  );
+  const sql = getSql();
+  const rows = (await sql`
+    UPDATE meetings SET
+      date = ${meeting.date},
+      meeting_type = ${meeting.meetingType},
+      presiding = ${meeting.presiding},
+      conducting = ${meeting.conducting},
+      announcements = ${meeting.announcements ?? []}::text[],
+      opening_hymn = ${JSON.stringify(meeting.openingHymn)}::jsonb,
+      opening_prayer = ${meeting.openingPrayer},
+      ward_business = ${JSON.stringify(meeting.wardBusiness)}::jsonb,
+      stake_business = ${meeting.stakeBusiness},
+      sacrament_hymn = ${JSON.stringify(meeting.sacramentHymn)}::jsonb,
+      speakers = ${JSON.stringify(meeting.speakers)}::jsonb,
+      closing_hymn = ${JSON.stringify(meeting.closingHymn)}::jsonb,
+      closing_prayer = ${meeting.closingPrayer}
+    WHERE id = ${id}
+    RETURNING *, to_char(date, 'YYYY-MM-DD') AS iso_date`) as MeetingRow[];
+
+  return rows[0] ? toMeeting(rows[0]) : undefined;
 }
 
+/** Returns false if no meeting had that id. */
 export async function deleteMeeting(id: number): Promise<boolean> {
-  throw new Error(`deleteMeeting (${id}) is not implemented until Week 04.`);
+  const sql = getSql();
+  const rows = (await sql`DELETE FROM meetings WHERE id = ${id} RETURNING id`) as {
+    id: number;
+  }[];
+  return rows.length > 0;
 }

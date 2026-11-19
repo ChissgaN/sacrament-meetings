@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import MeetingCard from '@/components/MeetingCard';
 import MeetingSearch from '@/components/MeetingSearch';
 import Pagination from '@/components/Pagination';
@@ -27,7 +28,15 @@ export default async function MeetingsPage({ searchParams }: MeetingsPageProps) 
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-3xl font-bold text-primary">Meetings</h1>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-3xl font-bold text-primary">Meetings</h1>
+        <Link
+          href="/meetings/new"
+          className="rounded-md bg-primary px-4 py-2 font-semibold text-white transition-opacity hover:opacity-90 print:hidden"
+        >
+          New meeting
+        </Link>
+      </div>
       <MeetingSearch />
 
       <p role="status" className="text-muted">
